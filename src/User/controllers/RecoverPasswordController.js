@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../Model/User");
 const crypto = require("crypto");
+const mailer = require("../../modules/mailer")
 
 router.post("/forgot_password", async (request, response) => {
 
@@ -26,8 +27,36 @@ router.post("/forgot_password", async (request, response) => {
         const now = new Date();
         now.setHours(now.getHours() + 1);
 
+        await User.update({
+            passwordResetToken: token,
+            passwordResetExpires: now
+        }, {
+            where: {
+                id: findUser.id
+            }
+        });
+
+        mailer.sendMail({
+            to: email,
+            from: 'kevin@hoxtak.com',
+            template: 'auth/forgot_password',
+            context: {token},
+        }, (err) => {
+
+            if (err) {
+                console.log(err)
+                return response.status(400).json({
+                    message: "cannot send forgot password email"
+                })
+            }
+
+            return response.send({resp: "ok"});
+
+        });
+
     } catch (erro) {
 
+        
         return response.status(400).json({
             error: "erro on forgot password, try again",
             err: erro
@@ -35,3 +64,5 @@ router.post("/forgot_password", async (request, response) => {
     }
 
 })
+
+module.exports = router;

@@ -5,6 +5,8 @@ const Users = require("./User/Model/User");
 const RegisterController = require("./User/controllers/RegisterController");
 const AuthenticateController = require("./User/controllers/AuthenticateController");
 const SecureRouteController = require("./User/controllers/SecureRoutecontroller");
+const RecoverPasswordController = require("./User/controllers/RecoverPasswordController");
+const ResetPasswordController = require("./User/controllers/ResetPasswordController");
 
 
 //express settings
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use("/", RegisterController);
 app.use("/", AuthenticateController);
 app.use("/", SecureRouteController);
+app.use("/", RecoverPasswordController);
+app.use("/", ResetPasswordController);
 
 const PORT = 8080;
 app.listen(PORT, () => {

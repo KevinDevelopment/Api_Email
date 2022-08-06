@@ -3,22 +3,30 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const Users = require("../Model/User");
 const generateToken = require("../../token/authToken");
+const validateEmail = require("../../validation/validation");
 
 router.post("/register", async (request, response) => {
-    
-    const {nome, email, password} = request.body;
+
+    const { nome, email, password } = request.body;
     const hash = await bcrypt.hash(password, 10);
 
     const findUser = await Users.findOne({
         raw: true,
-        attributes: ['id','nome','email','password'],
+        attributes: ['id', 'nome', 'email', 'password'],
         where: {
             email: email
         }
     });
-    
 
-    if(!findUser) {
+    const validation = validateEmail(email);
+
+    if (!validation) {
+        return response.status(400).json({
+            error: "please, insert a valid email"
+        })
+    };
+
+    if (!findUser) {
 
         const user = await Users.create({
 
@@ -31,7 +39,7 @@ router.post("/register", async (request, response) => {
             return response.status(200).json({
                 message: "user created",
                 User: user,
-                token: generateToken({id: Users.id})
+                token: generateToken({ id: Users.id })
             })
 
         }).catch((erro) => {
